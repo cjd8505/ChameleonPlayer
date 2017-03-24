@@ -103,13 +103,19 @@ public class VRVideoPlayerView: UIView {
         var cameraNodeAngleY: Float = 0.0
         var cameraNodeAngleZ: Float = 0.0
         
-        switch UIApplication.sharedApplication().statusBarOrientation.rawValue {
-        case 1:
+        switch UIApplication.sharedApplication().statusBarOrientation {
+        case .Portrait:
             cameraNodeAngleY = Float(-M_PI_2)
-        case 2:
+            
+        case .PortraitUpsideDown:
             cameraNodeAngleY = Float(M_PI_2)
-        case 3:
+            
+        case .LandscapeRight:
             cameraNodeAngleZ = Float(M_PI)
+            
+        case .LandscapeLeft:
+            cameraNodeAngleZ = Float(-M_PI)
+            
         default:
             break
         }
@@ -128,7 +134,6 @@ public class VRVideoPlayerView: UIView {
     
     public init(AVPlayer player: AVPlayer) {
         super.init(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
-        UIDeviceOrientationDidChangeNotification
         self.setupScene()
         self.setupVideoSceneWithAVPlayer(player)
         self.videoSKNode?.pause()
@@ -299,8 +304,43 @@ extension VRVideoPlayerView: UIGestureRecognizerDelegate {
         if let panView = panGR.view {
             let translation = panGR.translationInView(panView)
             
-            var newAngleYaw = Float(translation.x)
-            var newAnglePitch = Float(translation.y)
+            
+            var newAngleYaw: Float = {
+                switch UIApplication.sharedApplication().statusBarOrientation {
+                case .Portrait:
+                    return Float(translation.y)
+                    
+                case .PortraitUpsideDown:
+                    return Float(-translation.y)
+                    
+                case .LandscapeRight:
+                    return Float(translation.x)
+                    
+                case .LandscapeLeft:
+                    return Float(-translation.x)
+                    
+                default:
+                    return Float(translation.x)
+                }
+            }()
+            var newAnglePitch: Float = {
+                switch UIApplication.sharedApplication().statusBarOrientation {
+                case .Portrait:
+                    return Float(translation.x)
+                    
+                case .PortraitUpsideDown:
+                    return Float(-translation.x)
+                    
+                case .LandscapeRight:
+                    return Float(translation.y)
+                    
+                case .LandscapeLeft:
+                    return Float(-translation.y)
+                    
+                default:
+                    return Float(translation.y)
+                }
+            }()
             
             //current angle is an instance variable so i am adding the newAngle to it
             newAnglePitch += self.currentCameraAngle.pitch

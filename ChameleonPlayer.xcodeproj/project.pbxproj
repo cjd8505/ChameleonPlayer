@@ -401,6 +401,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eyepetizer.$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = ChameleonPlayer;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -417,6 +418,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eyepetizer.$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = ChameleonPlayer;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
