@@ -238,7 +238,9 @@ private extension VRVideoPlayerView {
         spriteKitScene.addChild(videoSKNode)
         
         let videoNode = SCNNode()
-        videoNode.geometry = SCNSphere(radius: 50)
+        let sphere = SCNSphere(radius: 50)
+        sphere.segmentCount = 78
+        videoNode.geometry = sphere
         videoNode.geometry?.firstMaterial?.diffuse.contents = spriteKitScene
         videoNode.geometry?.firstMaterial?.doubleSided = true
         
