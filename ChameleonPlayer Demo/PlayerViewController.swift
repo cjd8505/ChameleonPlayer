@@ -18,9 +18,10 @@ class PlayerViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        let player = AVPlayer(URL: NSURL(string: "http://baobab.wdjcdn.com/1464062027434Canyon.mp4")!)
+        let player = AVPlayer(URL: NSURL(string: "http://eyepetizer.ufile.ucloud.com.cn/1495173324927_a7b59cdf.mp4")!)
         self.player = player
         let vrPlayer = VRVideoPlayerView(AVPlayer: player)
+//        vrPlayer.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.width * 9 / 16.0)
         vrPlayer.frame = self.view.bounds
         vrPlayer.autoresizingMask = [.FlexibleHeight, .FlexibleWidth]
         self.view.addSubview(vrPlayer)
@@ -51,7 +52,7 @@ class PlayerViewController: UIViewController {
     }
     
     override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return .Landscape
+        return .LandscapeRight
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -95,6 +96,10 @@ extension PlayerViewController {
         let center = NSNotificationCenter.defaultCenter()
         center.removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: nil)
         center.removeObserver(self, name: UIApplicationWillResignActiveNotification, object: nil)
+    }
+
+    func notificationHandler(notification: NSNotification) {
+
     }
     
     func applicationDidBecomeActiveNotificationHandler(notification: NSNotification) {

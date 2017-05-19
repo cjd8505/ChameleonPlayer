@@ -186,6 +186,7 @@
 				TargetAttributes = {
 					757DD13A1CE4A51200DBC750 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = 2MEML6RC3R;
 					};
 					75CBCF511CD9B59900109BF6 = {
 						CreatedOnToolsVersion = 7.3;
@@ -277,11 +278,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 2MEML6RC3R;
 				INFOPLIST_FILE = "ChameleonPlayer Demo/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eyepetizer.ChameleonPlayer-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -289,11 +292,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 2MEML6RC3R;
 				INFOPLIST_FILE = "ChameleonPlayer Demo/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eyepetizer.ChameleonPlayer-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
