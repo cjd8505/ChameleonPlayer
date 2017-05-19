@@ -56,6 +56,7 @@ public class VRVideoPlayerView: UIView {
     
     private var isPaning: Bool = false
     private var firstFocusing: Bool = false
+    private var initalAttitude: CMAttitude? = nil
     
     public var panGestureRecognizer: UIPanGestureRecognizer? {
         willSet(newValue) {
@@ -87,6 +88,7 @@ public class VRVideoPlayerView: UIView {
                     self.motionManager.startDeviceMotionUpdatesUsingReferenceFrame(.XArbitraryCorrectedZVertical)
                 } else {
                     self.motionManager.stopDeviceMotionUpdates()
+                    self.initalAttitude = nil
                 }
             }
         }
@@ -100,15 +102,15 @@ public class VRVideoPlayerView: UIView {
     
     private var cameraNodeAngle: SCNVector3 {
         let cameraNodeAngleX: Float = Float(-M_PI_2)
-        var cameraNodeAngleY: Float = 0.0
+        let cameraNodeAngleY: Float = 0.0
         var cameraNodeAngleZ: Float = 0.0
         
         switch UIApplication.sharedApplication().statusBarOrientation {
-        case .Portrait:
-            cameraNodeAngleY = Float(-M_PI_2)
+        case .Portrait, .LandscapeRight:
+            cameraNodeAngleZ = Float(M_PI)
             
-        case .PortraitUpsideDown:
-            cameraNodeAngleY = Float(M_PI_2)
+        case .PortraitUpsideDown, .LandscapeLeft:
+            cameraNodeAngleZ = Float(-M_PI)
             
         case .LandscapeRight:
             cameraNodeAngleZ = Float(M_PI)
@@ -119,7 +121,7 @@ public class VRVideoPlayerView: UIView {
         default:
             break
         }
-        
+
         return SCNVector3(x: cameraNodeAngleX, y: cameraNodeAngleY, z: cameraNodeAngleZ)
     }
     private var currentCameraAngle: (pitch: Float, yaw: Float, roll: Float) = (0, 0, 0)
@@ -264,18 +266,29 @@ extension VRVideoPlayerView: SCNSceneRendererDelegate {
         if self.isPaning == false {
             dispatch_async(dispatch_get_main_queue()) {
                 if let currentAttitude = self.motionManager.deviceMotion?.attitude {
-                    let roll: Float = {
-                        if UIApplication.sharedApplication().statusBarOrientation == .LandscapeRight {
-                            return -1.0 * Float(-M_PI - currentAttitude.roll)
-                        } else {
-                            return Float(currentAttitude.roll)
-                        }
-                    }()
-                    
-                    //because of landscape
-                    self.currentAttitudeAngle.pitch = roll
-                    self.currentAttitudeAngle.yaw = Float(currentAttitude.yaw)
-                    self.currentAttitudeAngle.roll = Float(currentAttitude.pitch)
+
+                    guard self.initalAttitude != nil else {
+                        self.initalAttitude = currentAttitude
+                        return
+                    }
+
+                    currentAttitude.multiplyByInverseOfAttitude(self.initalAttitude!)
+
+                    let newPitch = Float(Int(currentAttitude.pitch * 100)) / 100.0
+                    let newYaw = Float(Int(currentAttitude.yaw * 100)) / 100.0
+                    let newRoll = Float(Int(currentAttitude.roll * 100)) / 100.0
+
+                    if UIApplication.sharedApplication().statusBarOrientation.isPortrait {
+                        self.currentAttitudeAngle.pitch = (-1.0 * Float(-M_PI - Double(newRoll)))
+                        self.currentAttitudeAngle.yaw = newYaw
+                        self.currentAttitudeAngle.roll = newPitch
+                    } else {
+                        self.currentAttitudeAngle.pitch = newPitch
+                        self.currentAttitudeAngle.yaw = newYaw
+                        self.currentAttitudeAngle.roll = newRoll
+                    }
+
+                    print(currentAttitude)
                     
                     if self.firstFocusing == false {
                         self.currentCameraAngle.pitch = (self.currentAttitudeAngle.pitch - 1.5) * self.panSensitiveness
@@ -292,7 +305,7 @@ extension VRVideoPlayerView: SCNSceneRendererDelegate {
             }
         }
     }
-    
+
 }
 
 //MARK: GestureRecognizer Handler
@@ -305,45 +318,10 @@ extension VRVideoPlayerView: UIGestureRecognizerDelegate {
     public func panGestureRecognizerHandler(panGR: UIPanGestureRecognizer) {
         if let panView = panGR.view {
             let translation = panGR.translationInView(panView)
-            
-            
-            var newAngleYaw: Float = {
-                switch UIApplication.sharedApplication().statusBarOrientation {
-                case .Portrait:
-                    return Float(translation.y)
-                    
-                case .PortraitUpsideDown:
-                    return Float(-translation.y)
-                    
-                case .LandscapeRight:
-                    return Float(translation.x)
-                    
-                case .LandscapeLeft:
-                    return Float(-translation.x)
-                    
-                default:
-                    return Float(translation.x)
-                }
-            }()
-            var newAnglePitch: Float = {
-                switch UIApplication.sharedApplication().statusBarOrientation {
-                case .Portrait:
-                    return Float(translation.x)
-                    
-                case .PortraitUpsideDown:
-                    return Float(-translation.x)
-                    
-                case .LandscapeRight:
-                    return Float(translation.y)
-                    
-                case .LandscapeLeft:
-                    return Float(-translation.y)
-                    
-                default:
-                    return Float(translation.y)
-                }
-            }()
-            
+
+            var newAngleYaw: Float = Float(translation.x)
+            var newAnglePitch: Float = Float(translation.y)
+
             //current angle is an instance variable so i am adding the newAngle to it
             newAnglePitch += self.currentCameraAngle.pitch
             newAngleYaw += self.currentCameraAngle.yaw
@@ -386,6 +364,11 @@ public extension VRVideoPlayerView {
         self.cameraPitchNode?.eulerAngles.x = 1.5
         self.cameraYawNode?.eulerAngles.y = 1.5
     }
+
+    func setNeedFocusing() {
+        self.initalAttitude = nil
+        self.firstFocusing = false
+    }
     
 }
 
@@ -414,6 +397,7 @@ extension VRVideoPlayerView {
     func applicationDidChangeStatusBarOrientationNotificationHandler(notification: NSNotification?) {
         if UIApplication.sharedApplication().applicationState == .Active {
             self.cameraNode?.eulerAngles = self.cameraNodeAngle
+            self.setNeedFocusing()
         }
     }
     
